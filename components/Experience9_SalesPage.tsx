@@ -39,6 +39,7 @@ export const Experience9_SalesPage: React.FC = () => {
     if (!formData.name || !formData.phone) return;
 
     setIsSubmitting(true);
+    console.log("Iniciando envío de formulario...", formData);
 
     try {
       const newLead = {
@@ -47,7 +48,17 @@ export const Experience9_SalesPage: React.FC = () => {
         timestamp: Date.now()
       };
 
-      await addDoc(collection(db, "leads"), newLead);
+      // Race condition: Firestore write vs 10s timeout
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Tiempo de espera agotado. Verifica tu conexión o la configuración de Firebase.")), 10000)
+      );
+
+      await Promise.race([
+        addDoc(collection(db, "leads"), newLead),
+        timeoutPromise
+      ]);
+
+      console.log("Documento guardado con éxito");
 
       // Redirigir a WhatsApp tras un breve delay
       setTimeout(() => {
@@ -56,8 +67,10 @@ export const Experience9_SalesPage: React.FC = () => {
         setIsModalOpen(false);
         setFormData({ name: '', phone: '' });
       }, 1200);
+
     } catch (error) {
       console.error("Error adding lead: ", error);
+      alert("Hubo un error al guardar. Verifica la consola para más detalles.\nPosible causa: Base de datos no creada o reglas de seguridad bloqueantes.");
       setIsSubmitting(false);
     }
   };

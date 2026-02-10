@@ -22,12 +22,17 @@ interface Props {
 }
 
 export const AdminPanel: React.FC<Props> = ({ onExit }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState(false);
   const [sessions, setSessions] = useState<UserSession[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [activeTab, setActiveTab] = useState<'overview' | 'sessions' | 'leads'>('overview');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
+    if (!isAuthenticated) return;
+
     setIsRefreshing(true);
 
     // Subscribe to Sessions
@@ -55,7 +60,60 @@ export const AdminPanel: React.FC<Props> = ({ onExit }) => {
       unsubscribeSessions();
       unsubscribeLeads();
     };
-  }, []);
+  }, [isAuthenticated]);
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password === 'vladimir2026') {
+      setIsAuthenticated(true);
+      setError(false);
+    } else {
+      setError(true);
+    }
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="fixed inset-0 z-[10000] bg-[#050505] flex items-center justify-center p-4">
+        <div className="w-full max-w-sm bg-neutral-900 border border-neutral-800 rounded-3xl p-8 space-y-6 text-center">
+          <div className="space-y-2">
+            <h1 className="text-2xl font-black uppercase text-white">Acceso Restringido</h1>
+            <p className="text-neutral-500 text-sm">Panel de Control Vladimir</p>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-2">
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Contraseña de acceso"
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-white text-center focus:border-red-600 outline-none transition-colors"
+                autoFocus
+              />
+              {error && <p className="text-red-500 text-xs font-bold">Contraseña incorrecta</p>}
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={onExit}
+                className="flex-1 bg-neutral-800 hover:bg-neutral-700 text-white font-bold py-3 rounded-xl transition-colors"
+              >
+                Salir
+              </button>
+              <button
+                type="submit"
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-colors"
+              >
+                Entrar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   // Función dummy para refrescar visualmente, aunque los datos son realtime
   const handleRefresh = () => {
