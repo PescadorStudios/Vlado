@@ -55,7 +55,7 @@ export const Experience0_Welcome: React.FC<Props> = ({ onComplete, onSkipToSales
               <Activity size={14} className="text-red-600" />
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400">Acceso Prioritario</span>
             </div>
-            <h1 className="text-5xl md:text-6xl font-black uppercase tracking-tighter leading-none text-white break-words">
+            <h1 className="text-3xl md:text-6xl font-black uppercase tracking-tighter leading-none text-white break-words">
               Garantizando tu <span className="text-red-600">bienestar</span>
             </h1>
             <p className="text-xl text-neutral-400 font-medium leading-tight px-4">
