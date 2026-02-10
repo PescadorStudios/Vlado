@@ -1,7 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { Shield, Target, Activity, CheckCircle, HelpCircle, ArrowRight, X, User, Phone as PhoneIcon, Users } from 'lucide-react';
 import { Lead } from '../types';
+import { db } from '../src/lib/firebase';
+import { collection, addDoc, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
 
 // LINK DE WHATSAPP REAL PROPORCIONADO
 const WHATSAPP_LINK = "https://chat.whatsapp.com/Iw5BGzTwmAx7syn2VMe0wp";
@@ -12,50 +13,58 @@ export const Experience9_SalesPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [recentLeads, setRecentLeads] = useState<Lead[]>([]);
 
-  // Cargar leads para prueba social
+  // Cargar leads para prueba social en tiempo real desde Firestore
   useEffect(() => {
-    const loadLeads = () => {
-      const stored = JSON.parse(localStorage.getItem('vladimir_leads') || '[]');
-      setRecentLeads(stored.slice(-5).reverse()); // Últimos 5
-    };
-    loadLeads();
-    // Escuchar cambios en storage por si se registra alguien
-    window.addEventListener('storage', loadLeads);
-    return () => window.removeEventListener('storage', loadLeads);
+    const q = query(
+      collection(db, "leads"),
+      orderBy("timestamp", "desc"),
+      limit(5)
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const leads = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Lead[];
+      setRecentLeads(leads);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const handleOpenForm = () => setIsModalOpen(true);
-  
-  const handleSubmit = (e: React.FormEvent) => {
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.phone) return;
 
     setIsSubmitting(true);
 
-    const newLead: Lead = {
-      id: Math.random().toString(36).substring(7),
-      name: formData.name,
-      phone: formData.phone,
-      timestamp: Date.now()
-    };
+    try {
+      const newLead = {
+        name: formData.name,
+        phone: formData.phone,
+        timestamp: Date.now()
+      };
 
-    const existingLeads: Lead[] = JSON.parse(localStorage.getItem('vladimir_leads') || '[]');
-    const updatedLeads = [...existingLeads, newLead];
-    localStorage.setItem('vladimir_leads', JSON.stringify(updatedLeads));
-    setRecentLeads(updatedLeads.slice(-5).reverse());
+      await addDoc(collection(db, "leads"), newLead);
 
-    // Redirigir a WhatsApp tras un breve delay
-    setTimeout(() => {
-      window.open(WHATSAPP_LINK, '_blank');
+      // Redirigir a WhatsApp tras un breve delay
+      setTimeout(() => {
+        window.open(WHATSAPP_LINK, '_blank');
+        setIsSubmitting(false);
+        setIsModalOpen(false);
+        setFormData({ name: '', phone: '' });
+      }, 1200);
+    } catch (error) {
+      console.error("Error adding lead: ", error);
       setIsSubmitting(false);
-      setIsModalOpen(false);
-      setFormData({ name: '', phone: '' });
-    }, 1200);
+    }
   };
 
   return (
     <div className="min-h-screen bg-white text-neutral-900 selection:bg-red-600 selection:text-white pb-24">
-      
+
       {/* 1. HEADLINE */}
       <section className="bg-red-600 text-white pt-24 pb-16 px-6 text-center">
         <div className="max-w-4xl mx-auto space-y-6">
@@ -64,7 +73,7 @@ export const Experience9_SalesPage: React.FC = () => {
             <span className="text-xs font-black uppercase tracking-widest">Ejecución Inmediata</span>
           </div>
           <h1 className="text-4xl md:text-7xl font-black uppercase tracking-tighter leading-[0.9] break-words">
-            El problema nunca fue la ley. <br/>
+            El problema nunca fue la ley. <br />
             <span className="text-blue-900">Fue que nadie la ejecutó.</span>
           </h1>
         </div>
@@ -83,8 +92,8 @@ export const Experience9_SalesPage: React.FC = () => {
       <section className="py-12 bg-neutral-50 border-y border-neutral-100 px-6">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-2 mb-8 justify-center md:justify-start">
-             <Users className="text-red-600" size={20} />
-             <h3 className="text-sm font-black uppercase tracking-widest text-neutral-400">Inscripciones en tiempo real</h3>
+            <Users className="text-red-600" size={20} />
+            <h3 className="text-sm font-black uppercase tracking-widest text-neutral-400">Inscripciones en tiempo real</h3>
           </div>
           <div className="flex flex-wrap gap-4 justify-center md:justify-start">
             {recentLeads.length > 0 ? recentLeads.map((lead) => (
@@ -111,7 +120,7 @@ export const Experience9_SalesPage: React.FC = () => {
             <h2 className="text-4xl font-black uppercase tracking-tight text-neutral-900">El Mecanismo</h2>
             <p className="text-lg text-neutral-600">Aquí no hay promesas futuras. Hay ejecución presente.</p>
             <div className="p-8 bg-neutral-100 rounded-3xl border-l-8 border-red-600">
-               <p className="text-xl font-bold italic leading-tight">"Cuando alguien identifica la ley, la reglamenta, la fiscaliza y responde por su cumplimiento, el sistema deja de fallar."</p>
+              <p className="text-xl font-bold italic leading-tight">"Cuando alguien identifica la ley, la reglamenta, la fiscaliza y responde por su cumplimiento, el sistema deja de fallar."</p>
             </div>
           </div>
           <div className="grid gap-4">
@@ -165,7 +174,7 @@ export const Experience9_SalesPage: React.FC = () => {
             ].map((faq, i) => (
               <div key={i} className="space-y-2">
                 <div className="flex gap-2 text-red-600 font-bold uppercase text-xs">
-                  <HelpCircle size={14} /> <span>FAQ {i+1}</span>
+                  <HelpCircle size={14} /> <span>FAQ {i + 1}</span>
                 </div>
                 <h4 className="text-xl font-bold text-neutral-900">{faq.q}</h4>
                 <p className="text-neutral-600 leading-relaxed">{faq.a}</p>
@@ -182,32 +191,32 @@ export const Experience9_SalesPage: React.FC = () => {
             <p className="text-red-600 font-bold tracking-widest uppercase">Último Paso</p>
             <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">Activa. Ejecuta. Participa.</h2>
           </div>
-          
+
           <div className="space-y-6 text-xl text-neutral-400">
             <p>Si también estás cansado de promesas...</p>
             <p>si ya no crees en discursos...</p>
             <p>si sabes que el problema no es la ley, sino su abandono...</p>
           </div>
 
-          <button 
+          <button
             onClick={handleOpenForm}
             className="group w-full md:w-auto bg-red-600 hover:bg-red-700 text-white font-black text-2xl uppercase tracking-tighter py-6 px-12 rounded-2xl transition-all shadow-2xl flex items-center justify-center gap-4 mx-auto active:scale-95"
           >
             Entrar a la comunidad
             <ArrowRight className="group-hover:translate-x-2 transition-transform" />
           </button>
-          
+
           <p className="text-sm text-neutral-600 italic">No mires más debates. No esperes otro slogan.</p>
         </div>
       </section>
 
       {/* Mobile Footer Sticky */}
       <div className="fixed bottom-6 left-6 right-6 z-40 md:hidden">
-        <button 
+        <button
           onClick={handleOpenForm}
           className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-[0_10px_30px_rgba(29,78,216,0.4)] flex items-center justify-center gap-2 active:scale-95 transition-transform"
         >
-           Ejecución Ahora <ArrowRight size={20} />
+          Ejecución Ahora <ArrowRight size={20} />
         </button>
       </div>
 
@@ -215,9 +224,9 @@ export const Experience9_SalesPage: React.FC = () => {
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/95 backdrop-blur-md" onClick={() => setIsModalOpen(false)} />
-          
+
           <div className="relative w-full max-w-md bg-[#0a0a0a] border border-neutral-800 rounded-3xl p-8 shadow-2xl animate-in zoom-in-95 duration-200">
-            <button 
+            <button
               onClick={() => setIsModalOpen(false)}
               className="absolute top-6 right-6 text-neutral-500 hover:text-white"
             >
@@ -233,29 +242,29 @@ export const Experience9_SalesPage: React.FC = () => {
               <div className="space-y-4">
                 <div className="relative">
                   <User className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500" size={18} />
-                  <input 
+                  <input
                     required
-                    type="text" 
+                    type="text"
                     placeholder="Nombre Completo"
                     className="w-full bg-neutral-900 border border-neutral-800 rounded-xl py-4 pl-12 pr-4 text-white focus:border-red-600 outline-none transition-colors"
                     value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   />
                 </div>
                 <div className="relative">
                   <PhoneIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500" size={18} />
-                  <input 
+                  <input
                     required
-                    type="tel" 
+                    type="tel"
                     placeholder="Tu número de teléfono"
                     className="w-full bg-neutral-900 border border-neutral-800 rounded-xl py-4 pl-12 pr-4 text-white focus:border-red-600 outline-none transition-colors"
                     value={formData.phone}
-                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   />
                 </div>
               </div>
 
-              <button 
+              <button
                 type="submit"
                 disabled={isSubmitting}
                 className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-black text-lg uppercase tracking-widest py-4 rounded-xl transition-all flex items-center justify-center gap-3"

@@ -1,13 +1,14 @@
-
 import React, { useState, useEffect } from 'react';
 import { FunnelStep, UserSession, Lead } from '../types';
-import { 
-  Users, 
-  Activity, 
-  ArrowLeft, 
-  Clock, 
-  ChevronRight, 
-  Trash2, 
+import { db } from '../src/lib/firebase';
+import { collection, query, orderBy, onSnapshot, limit } from 'firebase/firestore';
+import {
+  Users,
+  Activity,
+  ArrowLeft,
+  Clock,
+  ChevronRight,
+  Trash2,
   Smartphone,
   ClipboardList,
   Calendar,
@@ -26,34 +27,49 @@ export const AdminPanel: React.FC<Props> = ({ onExit }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'sessions' | 'leads'>('overview');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const loadData = () => {
+  useEffect(() => {
     setIsRefreshing(true);
-    const rawSessions = localStorage.getItem('vladimir_sessions') || '[]';
-    const rawLeads = localStorage.getItem('vladimir_leads') || '[]';
-    setSessions(JSON.parse(rawSessions));
-    setLeads(JSON.parse(rawLeads));
+
+    // Subscribe to Sessions
+    const sessionsQuery = query(collection(db, "sessions"), orderBy("lastActive", "desc"), limit(100));
+    const unsubscribeSessions = onSnapshot(sessionsQuery, (snapshot) => {
+      const loadedSessions = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as UserSession[];
+      setSessions(loadedSessions);
+      setIsRefreshing(false);
+    });
+
+    // Subscribe to Leads
+    const leadsQuery = query(collection(db, "leads"), orderBy("timestamp", "desc"), limit(100));
+    const unsubscribeLeads = onSnapshot(leadsQuery, (snapshot) => {
+      const loadedLeads = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Lead[];
+      setLeads(loadedLeads);
+    });
+
+    return () => {
+      unsubscribeSessions();
+      unsubscribeLeads();
+    };
+  }, []);
+
+  // Función dummy para refrescar visualmente, aunque los datos son realtime
+  const handleRefresh = () => {
+    setIsRefreshing(true);
     setTimeout(() => setIsRefreshing(false), 500);
   };
 
-  useEffect(() => {
-    loadData();
-    const interval = setInterval(loadData, 5000); 
-    return () => clearInterval(interval);
-  }, []);
-
   const clearData = () => {
-    if (confirm('¿Estás seguro de que quieres borrar todos los datos de analytics y leads? Esta acción es irreversible.')) {
-      localStorage.removeItem('vladimir_sessions');
-      localStorage.removeItem('vladimir_leads');
-      setSessions([]);
-      setLeads([]);
-      setActiveTab('overview');
-    }
+    alert("El borrado masivo está deshabilitado en la base de datos por seguridad.");
   };
 
   const calculateConversion = (step: FunnelStep) => {
     if (sessions.length === 0) return 0;
-    const count = sessions.filter(s => s.stepsReached.includes(step)).length;
+    const count = sessions.filter(s => s.stepsReached && s.stepsReached.includes(step)).length;
     return Math.round((count / sessions.length) * 100);
   };
 
@@ -71,31 +87,31 @@ export const AdminPanel: React.FC<Props> = ({ onExit }) => {
             <h1 className="text-lg md:text-xl font-black uppercase tracking-tighter leading-none">
               Vladimir <span className="text-red-600">Control</span>
             </h1>
-            <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest mt-1">Panel de Ejecución</p>
+            <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest mt-1">Panel de Ejecución (En Vivo)</p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <button 
-            onClick={loadData} 
+          <button
+            onClick={handleRefresh}
             className={`p-2 rounded-lg text-neutral-400 hover:text-white transition-all ${isRefreshing ? 'animate-spin text-blue-500' : ''}`}
           >
             <RefreshCw size={18} />
           </button>
           <div className="hidden md:flex bg-neutral-900 p-1 rounded-xl border border-neutral-800">
-            <button 
+            <button
               onClick={() => setActiveTab('overview')}
               className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${activeTab === 'overview' ? 'bg-blue-600 text-white shadow-lg' : 'text-neutral-500 hover:text-neutral-300'}`}
             >
               Métricas
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab('sessions')}
               className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${activeTab === 'sessions' ? 'bg-blue-600 text-white shadow-lg' : 'text-neutral-500 hover:text-neutral-300'}`}
             >
               Tráfico
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab('leads')}
               className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${activeTab === 'leads' ? 'bg-red-600 text-white shadow-lg shadow-red-900/20' : 'text-neutral-500 hover:text-neutral-300'}`}
             >
@@ -116,7 +132,7 @@ export const AdminPanel: React.FC<Props> = ({ onExit }) => {
       </div>
 
       <main className="max-w-6xl mx-auto p-4 md:p-8 space-y-8 pb-32">
-        
+
         {activeTab === 'overview' && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* KPI Cards */}
@@ -126,8 +142,8 @@ export const AdminPanel: React.FC<Props> = ({ onExit }) => {
                 <div className="text-xs font-bold uppercase text-neutral-500 tracking-widest">Total Tráfico</div>
                 <div className="text-4xl font-black">{sessions.length}</div>
               </div>
-              
-              <button 
+
+              <button
                 onClick={() => setActiveTab('leads')}
                 className="group bg-neutral-900/50 border border-neutral-800 p-6 rounded-3xl space-y-1 text-left hover:border-red-600/50 transition-all active:scale-95"
               >
@@ -158,9 +174,9 @@ export const AdminPanel: React.FC<Props> = ({ onExit }) => {
             <div className="bg-neutral-900/30 border border-neutral-800 p-8 rounded-[2.5rem] space-y-10">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-black uppercase tracking-[0.2em] text-neutral-500">Embudo de Ejecución</h3>
-                <span className="text-[10px] bg-blue-600/10 text-blue-500 px-3 py-1 rounded-full font-bold">Datos en vivo</span>
+                <span className="text-[10px] bg-green-600/10 text-green-500 px-3 py-1 rounded-full font-bold">Base de Datos Conectada</span>
               </div>
-              
+
               <div className="space-y-6">
                 {funnelSteps.map((stepName, i) => {
                   const perc = calculateConversion(stepName as FunnelStep);
@@ -168,13 +184,13 @@ export const AdminPanel: React.FC<Props> = ({ onExit }) => {
                     <div key={stepName} className="group">
                       <div className="flex justify-between items-end mb-2 px-1">
                         <div className="flex items-center gap-3">
-                          <span className="text-[10px] font-black text-neutral-700 w-4">0{i+1}</span>
+                          <span className="text-[10px] font-black text-neutral-700 w-4">0{i + 1}</span>
                           <span className="text-xs font-bold uppercase tracking-widest text-neutral-400 group-hover:text-white transition-colors">{stepName}</span>
                         </div>
                         <span className="text-xs font-mono font-black text-white">{perc}%</span>
                       </div>
                       <div className="h-2 w-full bg-neutral-800/50 rounded-full overflow-hidden">
-                        <div 
+                        <div
                           className="h-full bg-gradient-to-r from-blue-600 to-indigo-500 transition-all duration-1000 ease-out"
                           style={{ width: `${perc}%` }}
                         />
@@ -201,24 +217,23 @@ export const AdminPanel: React.FC<Props> = ({ onExit }) => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-neutral-800/50">
-                    {sessions.sort((a,b) => b.lastActive - a.lastActive).map((session) => (
+                    {sessions.map((session) => (
                       <tr key={session.id} className="hover:bg-white/5 transition-colors group">
                         <td className="px-6 py-5">
                           <span className="font-mono text-xs text-blue-500 group-hover:text-blue-400">#{session.id}</span>
                         </td>
                         <td className="px-6 py-5">
-                          <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${
-                            session.currentStep === FunnelStep.SALES_PAGE ? 'bg-green-500/10 text-green-500' : 'bg-neutral-800 text-neutral-400'
-                          }`}>
+                          <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${session.currentStep === FunnelStep.SALES_PAGE ? 'bg-green-500/10 text-green-500' : 'bg-neutral-800 text-neutral-400'
+                            }`}>
                             {session.currentStep}
                           </span>
                         </td>
                         <td className="px-6 py-5">
                           <div className="flex gap-1">
                             {funnelSteps.map((s, i) => (
-                              <div 
-                                key={i} 
-                                className={`h-1 w-3 rounded-full transition-all ${session.stepsReached.includes(s as FunnelStep) ? 'bg-blue-500 scale-y-125' : 'bg-neutral-700'}`} 
+                              <div
+                                key={i}
+                                className={`h-1 w-3 rounded-full transition-all ${session.stepsReached && session.stepsReached.includes(s as FunnelStep) ? 'bg-blue-500 scale-y-125' : 'bg-neutral-700'}`}
                                 title={s}
                               />
                             ))}
@@ -262,7 +277,7 @@ export const AdminPanel: React.FC<Props> = ({ onExit }) => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-neutral-800/50">
-                    {leads.sort((a,b) => b.timestamp - a.timestamp).map((lead) => (
+                    {leads.map((lead) => (
                       <tr key={lead.id} className="hover:bg-white/5 transition-colors group">
                         <td className="px-6 py-5">
                           <div className="flex items-center gap-4">
@@ -290,9 +305,9 @@ export const AdminPanel: React.FC<Props> = ({ onExit }) => {
                           </div>
                         </td>
                         <td className="px-6 py-5 text-right">
-                          <a 
-                            href={`https://wa.me/${lead.phone.replace(/\D/g, '')}?text=Hola%20${encodeURIComponent(lead.name.split(' ')[0])},%20vimos%20tu%20registro%20en%20el%20Plan%20de%20Ejecuci%C3%B3n%20de%20Vladimir.%20Bienvenido.`} 
-                            target="_blank" 
+                          <a
+                            href={`https://wa.me/${lead.phone.replace(/\D/g, '')}?text=Hola%20${encodeURIComponent(lead.name.split(' ')[0])},%20vimos%20tu%20registro%20en%20el%20Plan%20de%20Ejecuci%C3%B3n%20de%20Vladimir.%20Bienvenido.`}
+                            target="_blank"
                             rel="noreferrer"
                             className="inline-flex items-center gap-2 text-[10px] font-black uppercase bg-green-600/10 text-green-500 px-4 py-2.5 rounded-xl border border-green-500/20 hover:bg-green-600 hover:text-white transition-all active:scale-95 shadow-lg shadow-green-900/10"
                           >
@@ -309,7 +324,7 @@ export const AdminPanel: React.FC<Props> = ({ onExit }) => {
                               <ClipboardList size={32} />
                             </div>
                             <p className="text-neutral-500 font-bold uppercase tracking-widest text-[10px] leading-relaxed">
-                              Base de datos vacía.<br/>Los nuevos inscritos aparecerán aquí automáticamente.
+                              Base de datos vacía.<br />Los nuevos inscritos aparecerán aquí automáticamente.
                             </p>
                           </div>
                         </td>
