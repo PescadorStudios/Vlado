@@ -7,20 +7,25 @@ interface Props {
 }
 
 const videoData = [
-  { 
-    id: 1, 
+  {
+    id: 1,
     url: "https://res.cloudinary.com/dtwegeovt/video/upload/v1770434181/copy_7CDDBBD5-ACCB-4C8C-9684-154EAE50E1D6_d3kmr0.mov",
     caption: "Garantizando tu bienestar. La ejecución es ahora."
   },
-  { 
-    id: 2, 
+  {
+    id: 2,
     url: "https://res.cloudinary.com/dtwegeovt/video/upload/v1770434180/copy_5DEF6A3A-01F7-4B27-AFA4-01CBC0BFED21_e1pvex.mov",
     caption: "Antes se prometía, hoy se ejecuta. Vladimir responde."
   },
-  { 
-    id: 3, 
+  {
+    id: 3,
     url: "https://res.cloudinary.com/dtwegeovt/video/upload/v1770434181/copy_C248C514-642B-4C58-927F-CF83211B38CA_yykqfg.mov",
     caption: "El bienestar no es un eslogan, es un derecho que vamos a ejecutar."
+  },
+  {
+    id: 4,
+    url: "https://res.cloudinary.com/dtwegeovt/video/upload/v1771085071/copy_7E034931-DE61-42E1-B749-0C64E19EE061_f7zpjb.mov",
+    caption: "Compromiso absoluto con cada ciudadano. La transformación ha comenzado."
   }
 ];
 
@@ -41,7 +46,7 @@ export const Experience7_Feed: React.FC<Props> = ({ onComplete }) => {
         if (entry.isIntersecting) {
           const index = Number(entry.target.getAttribute('data-index'));
           setActiveIdx(index);
-          
+
           // Reproducir el video que entró en vista
           const video = videoRefs.current[index];
           if (video) {
@@ -58,7 +63,7 @@ export const Experience7_Feed: React.FC<Props> = ({ onComplete }) => {
     };
 
     const observer = new IntersectionObserver(handleIntersection, observerOptions);
-    
+
     // Observar cada contenedor de video
     const videoContainers = containerRef.current?.querySelectorAll('.video-snap-item');
     videoContainers?.forEach((el) => observer.observe(el));
@@ -74,13 +79,13 @@ export const Experience7_Feed: React.FC<Props> = ({ onComplete }) => {
   return (
     <div className="fixed inset-0 bg-[#121212] flex items-center justify-center overflow-hidden">
       {/* Contenedor principal limitado en escritorio */}
-      <div 
+      <div
         ref={containerRef}
         className="relative w-full max-w-[450px] h-[100dvh] bg-black overflow-y-scroll snap-y snap-mandatory no-scrollbar scroll-smooth"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {videoData.map((v, i) => (
-          <div 
+          <div
             key={v.id}
             data-index={i}
             className="video-snap-item relative w-full h-[100dvh] snap-start snap-always flex flex-col"
@@ -91,9 +96,14 @@ export const Experience7_Feed: React.FC<Props> = ({ onComplete }) => {
                 ref={el => videoRefs.current[i] = el}
                 src={v.url}
                 className="w-full h-full object-cover"
-                loop
+                loop={i !== videoData.length - 1}
                 playsInline
                 muted={isMuted}
+                onEnded={() => {
+                  if (i === videoData.length - 1) {
+                    onComplete();
+                  }
+                }}
                 onClick={() => {
                   const video = videoRefs.current[i];
                   if (video) {
@@ -103,7 +113,7 @@ export const Experience7_Feed: React.FC<Props> = ({ onComplete }) => {
               />
 
               {/* Mute Toggle Overlay */}
-              <button 
+              <button
                 onClick={toggleMute}
                 className="absolute top-6 right-6 z-20 bg-black/40 p-2.5 rounded-full backdrop-blur-md text-white border border-white/10 active:scale-90 transition-transform"
               >
@@ -141,7 +151,7 @@ export const Experience7_Feed: React.FC<Props> = ({ onComplete }) => {
                     <span className="text-sm font-bold text-white tracking-wide flex items-center gap-1">
                       vladimir.ejecucion
                       <div className="w-3.5 h-3.5 bg-blue-500 rounded-full flex items-center justify-center">
-                        <svg viewBox="0 0 24 24" className="w-2 h-2 text-white fill-current"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                        <svg viewBox="0 0 24 24" className="w-2 h-2 text-white fill-current"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" /></svg>
                       </div>
                     </span>
                     <span className="text-[10px] text-neutral-300 font-medium">Audio original • Vladimir</span>
@@ -151,10 +161,10 @@ export const Experience7_Feed: React.FC<Props> = ({ onComplete }) => {
                 <p className="text-sm text-white font-medium leading-relaxed drop-shadow-lg pr-12">
                   {v.caption} <span className="text-blue-400 font-bold">#EjecucionReal #Bienestar #Vladimir</span>
                 </p>
-                
+
                 {/* Indicador de scroll o botón final */}
                 {i === videoData.length - 1 ? (
-                  <button 
+                  <button
                     onClick={(e) => { e.stopPropagation(); onComplete(); }}
                     className="mt-6 w-full bg-red-600 text-white font-black text-sm uppercase tracking-widest py-4 rounded-xl shadow-[0_0_20px_rgba(220,38,38,0.4)] active:scale-[0.98] transition-all"
                   >
@@ -178,8 +188,8 @@ export const Experience7_Feed: React.FC<Props> = ({ onComplete }) => {
         <div className="h-40 w-[1px] bg-white/50 mx-auto" />
       </div>
       <div className="hidden lg:flex fixed right-10 top-1/2 -translate-y-1/2 flex-col gap-8 opacity-20 pointer-events-none">
-         <h3 className="text-6xl font-black uppercase vertical-text tracking-tighter text-white">PRIVADO</h3>
-         <div className="h-40 w-[1px] bg-white/50 mx-auto" />
+        <h3 className="text-6xl font-black uppercase vertical-text tracking-tighter text-white">PRIVADO</h3>
+        <div className="h-40 w-[1px] bg-white/50 mx-auto" />
       </div>
 
       <style>{`

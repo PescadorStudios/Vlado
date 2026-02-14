@@ -133,8 +133,8 @@ const App: React.FC = () => {
                       setShowDevPanel(false);
                     }}
                     className={`flex items-center justify-between text-left px-3 py-2 rounded-lg text-[10px] font-bold uppercase transition-colors ${step === s
-                        ? 'bg-red-600 text-white'
-                        : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700 hover:text-neutral-200'
+                      ? 'bg-red-600 text-white'
+                      : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700 hover:text-neutral-200'
                       }`}
                   >
                     <span>{s}</span>
@@ -179,7 +179,7 @@ const App: React.FC = () => {
           />
         )}
         {step === FunnelStep.INSTA_LOGIN && <Experience6_InstaLogin onComplete={nextStep} />}
-        {step === FunnelStep.FEED && <Experience7_Feed onComplete={nextStep} />}
+        {step === FunnelStep.FEED && <Experience7_Feed onComplete={goToSales} />}
         {step === FunnelStep.WHATSAPP_OBJECTIONS && (
           <WhatsAppInterface
             contactName="Camila"
