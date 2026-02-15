@@ -56,15 +56,18 @@ const App: React.FC = () => {
     const params = new URLSearchParams(window.location.search);
     const path = window.location.pathname;
 
-    if (path === '/adminpanel' || params.get('debug') === 'true' || params.get('admin') === 'true') {
+    // 1. Manejar Modo Debug (parámetros explícitos)
+    if (params.get('debug') === 'true' || params.get('admin') === 'true') {
       setDebugEnabled(true);
       localStorage.setItem('vladimir_debug_mode', 'true');
-      if (path === '/adminpanel') {
-        setStep(FunnelStep.ADMIN);
-      }
     } else if (params.get('debug') === 'false') {
       setDebugEnabled(false);
       localStorage.setItem('vladimir_debug_mode', 'false');
+    }
+
+    // 2. Manejar Navegación por Ruta (independiente del modo debug)
+    if (path === '/adminpanel') {
+      setStep(FunnelStep.ADMIN);
     }
   }, []);
 
