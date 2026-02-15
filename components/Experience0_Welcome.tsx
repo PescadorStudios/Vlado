@@ -55,8 +55,9 @@ export const Experience0_Welcome: React.FC<Props> = ({ onComplete, onSkipToSales
               <Activity size={14} className="text-red-600" />
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400">Acceso Prioritario</span>
             </div>
-            <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tighter leading-none text-white whitespace-nowrap">
-              Garantizando tu <span className="text-red-600">bienestar</span>
+            <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tighter leading-[0.9] text-white flex flex-col items-center">
+              <span>Garantizando tu</span>
+              <span className="text-red-600">bienestar</span>
             </h1>
             <p className="text-xl text-neutral-400 font-medium leading-tight px-4">
               Tu tranquilidad no puede ser una promesa. Es una deuda que vamos a ejecutar hoy.
