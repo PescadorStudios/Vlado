@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FunnelStep, UserSession, Lead } from '../types';
 import { db } from '../src/lib/firebase';
-import { collection, query, orderBy, onSnapshot, limit } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, limit, getCountFromServer } from 'firebase/firestore';
 import {
   Users,
   Activity,
@@ -29,6 +29,8 @@ export const AdminPanel: React.FC<Props> = ({ onExit }) => {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [activeTab, setActiveTab] = useState<'overview' | 'sessions' | 'leads'>('overview');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [totalSessions, setTotalSessions] = useState(0);
+  const [totalLeads, setTotalLeads] = useState(0);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -55,6 +57,21 @@ export const AdminPanel: React.FC<Props> = ({ onExit }) => {
       })) as Lead[];
       setLeads(loadedLeads);
     });
+
+    // Fetch Total Counts (Realtime count not supported natively without heavy costs/functions, so we fetch once or on refresh)
+    const fetchTotals = async () => {
+      try {
+        const sSnapshot = await getCountFromServer(collection(db, "sessions"));
+        setTotalSessions(sSnapshot.data().count);
+
+        const lSnapshot = await getCountFromServer(collection(db, "leads"));
+        setTotalLeads(lSnapshot.data().count);
+      } catch (e) {
+        console.error("Error fetching totals:", e);
+      }
+    };
+
+    fetchTotals();
 
     return () => {
       unsubscribeSessions();
@@ -115,9 +132,18 @@ export const AdminPanel: React.FC<Props> = ({ onExit }) => {
     );
   }
 
-  // Función dummy para refrescar visualmente, aunque los datos son realtime
-  const handleRefresh = () => {
+  // Función para refrescar datos y totales
+  const handleRefresh = async () => {
     setIsRefreshing(true);
+    try {
+      const sSnapshot = await getCountFromServer(collection(db, "sessions"));
+      setTotalSessions(sSnapshot.data().count);
+
+      const lSnapshot = await getCountFromServer(collection(db, "leads"));
+      setTotalLeads(lSnapshot.data().count);
+    } catch (e) {
+      console.error("Error refreshing totals:", e);
+    }
     setTimeout(() => setIsRefreshing(false), 500);
   };
 
@@ -173,7 +199,7 @@ export const AdminPanel: React.FC<Props> = ({ onExit }) => {
               onClick={() => setActiveTab('leads')}
               className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${activeTab === 'leads' ? 'bg-red-600 text-white shadow-lg shadow-red-900/20' : 'text-neutral-500 hover:text-neutral-300'}`}
             >
-              Inscritos ({leads.length})
+              Inscritos ({totalLeads})
             </button>
           </div>
           <button onClick={clearData} className="p-2 text-neutral-700 hover:text-red-500 transition-colors ml-2" title="Resetear todo">
@@ -186,7 +212,7 @@ export const AdminPanel: React.FC<Props> = ({ onExit }) => {
       <div className="md:hidden fixed bottom-6 left-6 right-6 z-50 bg-neutral-900/90 backdrop-blur-md border border-neutral-800 p-1.5 rounded-2xl flex shadow-2xl">
         <button onClick={() => setActiveTab('overview')} className={`flex-1 py-3 rounded-xl text-[9px] font-black uppercase ${activeTab === 'overview' ? 'bg-blue-600 text-white' : 'text-neutral-500'}`}>Métricas</button>
         <button onClick={() => setActiveTab('sessions')} className={`flex-1 py-3 rounded-xl text-[9px] font-black uppercase ${activeTab === 'sessions' ? 'bg-blue-600 text-white' : 'text-neutral-500'}`}>Tráfico</button>
-        <button onClick={() => setActiveTab('leads')} className={`flex-1 py-3 rounded-xl text-[9px] font-black uppercase ${activeTab === 'leads' ? 'bg-red-600 text-white' : 'text-neutral-500'}`}>Leads ({leads.length})</button>
+        <button onClick={() => setActiveTab('leads')} className={`flex-1 py-3 rounded-xl text-[9px] font-black uppercase ${activeTab === 'leads' ? 'bg-red-600 text-white' : 'text-neutral-500'}`}>Leads ({totalLeads})</button>
       </div>
 
       <main className="max-w-6xl mx-auto p-4 md:p-8 space-y-8 pb-32">
@@ -198,7 +224,7 @@ export const AdminPanel: React.FC<Props> = ({ onExit }) => {
               <div className="bg-neutral-900/50 border border-neutral-800 p-6 rounded-3xl space-y-1">
                 <Users size={20} className="text-neutral-500 mb-2" />
                 <div className="text-xs font-bold uppercase text-neutral-500 tracking-widest">Total Tráfico</div>
-                <div className="text-4xl font-black">{sessions.length}</div>
+                <div className="text-4xl font-black">{totalSessions}</div>
               </div>
 
               <button
@@ -208,7 +234,7 @@ export const AdminPanel: React.FC<Props> = ({ onExit }) => {
                 <ClipboardList size={20} className="text-red-500 mb-2" />
                 <div className="text-xs font-bold uppercase text-neutral-500 tracking-widest">Inscritos Finales</div>
                 <div className="text-4xl font-black text-red-600 flex items-center gap-2">
-                  {leads.length}
+                  {totalLeads}
                   <ChevronRight size={24} className="group-hover:translate-x-1 transition-transform opacity-30" />
                 </div>
               </button>
@@ -223,7 +249,7 @@ export const AdminPanel: React.FC<Props> = ({ onExit }) => {
                 <ExternalLink size={20} className="text-green-500 mb-2" />
                 <div className="text-xs font-bold uppercase text-neutral-500 tracking-widest">Conv. Leads</div>
                 <div className="text-4xl font-black text-green-500">
-                  {sessions.length > 0 ? Math.round((leads.length / sessions.length) * 100) : 0}%
+                  {totalSessions > 0 ? Math.round((totalLeads / totalSessions) * 100) : 0}%
                 </div>
               </div>
             </div>
@@ -319,7 +345,7 @@ export const AdminPanel: React.FC<Props> = ({ onExit }) => {
             <div className="flex items-center justify-between px-2">
               <h2 className="text-xl font-black uppercase tracking-tighter">Personas Inscritas</h2>
               <div className="text-[10px] font-bold uppercase text-neutral-500 border border-neutral-800 px-3 py-1 rounded-full">
-                {leads.length} Resultados
+                {totalLeads} Resultados
               </div>
             </div>
 
