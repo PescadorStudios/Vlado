@@ -18,7 +18,7 @@ export const Experience6_InstaLogin: React.FC<Props> = ({ onComplete }) => {
             <Lock size={12} className="text-red-500" />
             <span className="text-[9px] font-black uppercase tracking-[0.2em] text-neutral-400">Servidor de Respaldo Seguro</span>
           </div>
-          <h1 className="text-5xl font-serif italic text-white tracking-tight">Instagram</h1>
+          <h1 className="text-4xl md:text-5xl font-serif italic text-white tracking-tight">Comunidad privada</h1>
           <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-neutral-500">Acceso a Evidencia</p>
         </div>
 
@@ -31,16 +31,16 @@ export const Experience6_InstaLogin: React.FC<Props> = ({ onComplete }) => {
               <input
                 type="text"
                 placeholder="Usuario o correo"
-                defaultValue="EJECUTOR_8M"
+                defaultValue="Ley_bienestar"
                 className="w-full h-12 bg-white/5 border border-white/10 rounded-2xl px-4 text-sm text-white placeholder-neutral-600 focus:border-red-500/50 focus:bg-white/10 outline-none transition-all font-medium"
                 readOnly
               />
             </div>
             <div className="relative">
               <input
-                type="password"
+                type="text"
                 placeholder="Contraseña"
-                defaultValue="BIENESTAR_REAL"
+                defaultValue="Vlado_ejecuta"
                 className="w-full h-12 bg-white/5 border border-white/10 rounded-2xl px-4 text-sm text-white placeholder-neutral-600 focus:border-red-500/50 focus:bg-white/10 outline-none transition-all font-medium"
                 readOnly
               />
