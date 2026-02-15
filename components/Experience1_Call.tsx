@@ -103,7 +103,7 @@ export const Experience1_Call: React.FC<Props> = ({ onComplete }) => {
         <div className="relative">
           <div className="w-32 h-32 rounded-full bg-neutral-800 flex items-center justify-center border-4 border-neutral-700 overflow-hidden animate-pulse-custom shadow-[0_0_50px_rgba(255,255,255,0.1)]">
             <img
-              src="https://res.cloudinary.com/dtwegeovt/image/upload/v1770430080/IMG_7827_wrfl6u.jpg"
+              src="https://res.cloudinary.com/dtwegeovt/image/upload/v1771123510/IMG_7904_gfcss6.jpg"
               alt="Camila Avatar"
               className="w-full h-full object-cover"
             />

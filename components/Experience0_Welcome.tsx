@@ -95,7 +95,7 @@ export const Experience0_Welcome: React.FC<Props> = ({ onComplete, onSkipToSales
       <div className="fixed inset-0 z-[60] bg-black flex items-center justify-center">
         <video
           ref={videoRef}
-          src="https://res.cloudinary.com/dtwegeovt/video/upload/v1770429768/copy_8D64D716-A45D-4F7F-A943-E40FB1319F55_c0bcld.mov"
+          src="https://res.cloudinary.com/dtwegeovt/video/upload/v1771123342/copy_6C0269E3-B38D-4DDF-8C11-CA7FADD49BC4_sciort.mov"
           playsInline
           className="w-full h-full object-contain"
           onEnded={() => setVideoFinished(true)}
