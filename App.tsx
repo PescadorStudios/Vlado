@@ -51,12 +51,17 @@ const App: React.FC = () => {
     return () => window.removeEventListener('click', handleWindowClick);
   }, []);
 
-  // Verificar parámetros de URL
+  // Verificar parámetros de URL y ruta
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('debug') === 'true' || params.get('admin') === 'true') {
+    const path = window.location.pathname;
+
+    if (path === '/adminpanel' || params.get('debug') === 'true' || params.get('admin') === 'true') {
       setDebugEnabled(true);
       localStorage.setItem('vladimir_debug_mode', 'true');
+      if (path === '/adminpanel') {
+        setStep(FunnelStep.ADMIN);
+      }
     } else if (params.get('debug') === 'false') {
       setDebugEnabled(false);
       localStorage.setItem('vladimir_debug_mode', 'false');
@@ -133,8 +138,8 @@ const App: React.FC = () => {
                       setShowDevPanel(false);
                     }}
                     className={`flex items-center justify-between text-left px-3 py-2 rounded-lg text-[10px] font-bold uppercase transition-colors ${step === s
-                        ? 'bg-red-600 text-white'
-                        : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700 hover:text-neutral-200'
+                      ? 'bg-red-600 text-white'
+                      : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700 hover:text-neutral-200'
                       }`}
                   >
                     <span>{s}</span>
