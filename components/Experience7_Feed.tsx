@@ -24,7 +24,7 @@ const videoData = [
   },
   {
     id: 4,
-    url: "https://res.cloudinary.com/dtwegeovt/video/upload/v1771085071/copy_7E034931-DE61-42E1-B749-0C64E19EE061_f7zpjb.mov",
+    url: "https://res.cloudinary.com/dtwegeovt/video/upload/f_auto,q_auto/v1771085071/copy_7E034931-DE61-42E1-B749-0C64E19EE061_f7zpjb.mov",
     caption: "La evidencia es clara. El momento de actuar es ahora mismo."
   }
 ];
