@@ -24,7 +24,7 @@ export const Experience1_Call: React.FC<Props> = ({ onComplete }) => {
     ringtoneRef.current = ringtone;
 
     // Voz de Camila (Pre-carga)
-    const voice = new Audio('https://res.cloudinary.com/dtwegeovt/video/upload/v1770431366/copy_9E915D7C-690E-4F76-8D15-9A3283B97740_zjhfbw.mp3');
+    const voice = new Audio('https://res.cloudinary.com/dtwegeovt/video/upload/v1771345967/ElevenLabs_2026-02-17T16_29_48_Lina_-_Carefree_Fresh_pvc_sp115_s50_sb75_se0_b_m2_qcqnge.mp3');
     voice.muted = false;
     voice.volume = 1.0;
     voice.load(); // Forzamos carga
@@ -80,7 +80,7 @@ export const Experience1_Call: React.FC<Props> = ({ onComplete }) => {
       };
     } else {
       // Fallback si por alguna razón el ref se perdió
-      const fallbackVoice = new Audio('https://res.cloudinary.com/dtwegeovt/video/upload/v1770431366/copy_9E915D7C-690E-4F76-8D15-9A3283B97740_zjhfbw.mp3');
+      const fallbackVoice = new Audio('https://res.cloudinary.com/dtwegeovt/video/upload/v1771345967/ElevenLabs_2026-02-17T16_29_48_Lina_-_Carefree_Fresh_pvc_sp115_s50_sb75_se0_b_m2_qcqnge.mp3');
       fallbackVoice.play();
       fallbackVoice.onended = handleEndCall;
     }
