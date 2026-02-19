@@ -62,7 +62,7 @@ export const Experience9_SalesPage: React.FC = () => {
 
       // Redirigir a WhatsApp tras un breve delay
       setTimeout(() => {
-        window.open(WHATSAPP_LINK, '_blank');
+        window.location.href = WHATSAPP_LINK;
         setIsSubmitting(false);
         setIsModalOpen(false);
         setFormData({ name: '', phone: '' });
