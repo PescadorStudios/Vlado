@@ -27,10 +27,12 @@ export const AdminPanel: React.FC<Props> = ({ onExit }) => {
   const [error, setError] = useState(false);
   const [sessions, setSessions] = useState<UserSession[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
-  const [activeTab, setActiveTab] = useState<'overview' | 'sessions' | 'leads'>('overview');
+  const [bienestarUsers, setBienestarUsers] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'overview' | 'sessions' | 'leads' | 'bienestar'>('overview');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [totalSessions, setTotalSessions] = useState(0);
   const [totalLeads, setTotalLeads] = useState(0);
+  const [totalBienestar, setTotalBienestar] = useState(0);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -58,6 +60,16 @@ export const AdminPanel: React.FC<Props> = ({ onExit }) => {
       setLeads(loadedLeads);
     });
 
+    // Subscribe to Bienestar Users
+    const bienestarQuery = query(collection(db, "bienestar_users"), orderBy("timestamp", "desc"), limit(100));
+    const unsubscribeBienestar = onSnapshot(bienestarQuery, (snapshot) => {
+      const loadedUsers = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setBienestarUsers(loadedUsers);
+    });
+
     // Fetch Total Counts (Realtime count not supported natively without heavy costs/functions, so we fetch once or on refresh)
     const fetchTotals = async () => {
       try {
@@ -66,6 +78,9 @@ export const AdminPanel: React.FC<Props> = ({ onExit }) => {
 
         const lSnapshot = await getCountFromServer(collection(db, "leads"));
         setTotalLeads(lSnapshot.data().count);
+
+        const bSnapshot = await getCountFromServer(collection(db, "bienestar_users"));
+        setTotalBienestar(bSnapshot.data().count);
       } catch (e) {
         console.error("Error fetching totals:", e);
       }
@@ -76,6 +91,7 @@ export const AdminPanel: React.FC<Props> = ({ onExit }) => {
     return () => {
       unsubscribeSessions();
       unsubscribeLeads();
+      unsubscribeBienestar();
     };
   }, [isAuthenticated]);
 
@@ -141,6 +157,9 @@ export const AdminPanel: React.FC<Props> = ({ onExit }) => {
 
       const lSnapshot = await getCountFromServer(collection(db, "leads"));
       setTotalLeads(lSnapshot.data().count);
+
+      const bSnapshot = await getCountFromServer(collection(db, "bienestar_users"));
+      setTotalBienestar(bSnapshot.data().count);
     } catch (e) {
       console.error("Error refreshing totals:", e);
     }
@@ -201,6 +220,12 @@ export const AdminPanel: React.FC<Props> = ({ onExit }) => {
             >
               Inscritos ({totalLeads})
             </button>
+            <button
+              onClick={() => setActiveTab('bienestar')}
+              className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${activeTab === 'bienestar' ? 'bg-green-600 text-white shadow-lg shadow-green-900/20' : 'text-neutral-500 hover:text-neutral-300'}`}
+            >
+              Bienestar ({totalBienestar})
+            </button>
           </div>
           <button onClick={clearData} className="p-2 text-neutral-700 hover:text-red-500 transition-colors ml-2" title="Resetear todo">
             <Trash2 size={18} />
@@ -209,10 +234,11 @@ export const AdminPanel: React.FC<Props> = ({ onExit }) => {
       </header>
 
       {/* NAVEGACIÓN MÓVIL (TABS INFERIORES) */}
-      <div className="md:hidden fixed bottom-6 left-6 right-6 z-50 bg-neutral-900/90 backdrop-blur-md border border-neutral-800 p-1.5 rounded-2xl flex shadow-2xl">
-        <button onClick={() => setActiveTab('overview')} className={`flex-1 py-3 rounded-xl text-[9px] font-black uppercase ${activeTab === 'overview' ? 'bg-blue-600 text-white' : 'text-neutral-500'}`}>Métricas</button>
-        <button onClick={() => setActiveTab('sessions')} className={`flex-1 py-3 rounded-xl text-[9px] font-black uppercase ${activeTab === 'sessions' ? 'bg-blue-600 text-white' : 'text-neutral-500'}`}>Tráfico</button>
-        <button onClick={() => setActiveTab('leads')} className={`flex-1 py-3 rounded-xl text-[9px] font-black uppercase ${activeTab === 'leads' ? 'bg-red-600 text-white' : 'text-neutral-500'}`}>Leads ({totalLeads})</button>
+      <div className="md:hidden fixed bottom-6 left-6 right-6 z-50 bg-neutral-900/90 backdrop-blur-md border border-neutral-800 p-1.5 rounded-2xl flex shadow-2xl overflow-x-auto custom-scrollbar">
+        <button onClick={() => setActiveTab('overview')} className={`flex-shrink-0 px-4 py-3 rounded-xl text-[9px] font-black uppercase ${activeTab === 'overview' ? 'bg-blue-600 text-white' : 'text-neutral-500'}`}>Métricas</button>
+        <button onClick={() => setActiveTab('sessions')} className={`flex-shrink-0 px-4 py-3 rounded-xl text-[9px] font-black uppercase ${activeTab === 'sessions' ? 'bg-blue-600 text-white' : 'text-neutral-500'}`}>Tráfico</button>
+        <button onClick={() => setActiveTab('leads')} className={`flex-shrink-0 px-4 py-3 rounded-xl text-[9px] font-black uppercase ${activeTab === 'leads' ? 'bg-red-600 text-white' : 'text-neutral-500'}`}>Leads ({totalLeads})</button>
+        <button onClick={() => setActiveTab('bienestar')} className={`flex-shrink-0 px-4 py-3 rounded-xl text-[9px] font-black uppercase ${activeTab === 'bienestar' ? 'bg-green-600 text-white' : 'text-neutral-500'}`}>Bienestar ({totalBienestar})</button>
       </div>
 
       <main className="max-w-6xl mx-auto p-4 md:p-8 space-y-8 pb-32">
@@ -409,6 +435,102 @@ export const AdminPanel: React.FC<Props> = ({ onExit }) => {
                             </div>
                             <p className="text-neutral-500 font-bold uppercase tracking-widest text-[10px] leading-relaxed">
                               Base de datos vacía.<br />Los nuevos inscritos aparecerán aquí automáticamente.
+                            </p>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'bienestar' && (
+          <div className="animate-in fade-in slide-in-from-right-4 duration-500 space-y-6">
+            <div className="flex items-center justify-between px-2">
+              <h2 className="text-xl font-black uppercase tracking-tighter">Bienestar y Tecnología</h2>
+              <div className="text-[10px] font-bold uppercase text-neutral-500 border border-neutral-800 px-3 py-1 rounded-full">
+                {totalBienestar} Registrados
+              </div>
+            </div>
+
+            <div className="bg-neutral-900/50 border border-neutral-800 rounded-3xl overflow-hidden shadow-2xl">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-neutral-800 bg-neutral-900/80">
+                      <th className="px-6 py-5 text-[10px] font-black uppercase text-neutral-500 tracking-widest">Nombre Completo</th>
+                      <th className="px-6 py-5 text-[10px] font-black uppercase text-neutral-500 tracking-widest">Celular</th>
+                      <th className="px-6 py-5 text-[10px] font-black uppercase text-neutral-500 tracking-widest">Referido Por</th>
+                      <th className="px-6 py-5 text-[10px] font-black uppercase text-neutral-500 tracking-widest">Fecha y Hora</th>
+                      <th className="px-6 py-5 text-[10px] font-black uppercase text-neutral-500 tracking-widest text-right">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-neutral-800/50">
+                    {bienestarUsers.map((user) => {
+                      const referrer = user.referredBy ? bienestarUsers.find(u => u.id === user.referredBy) : null;
+                      return (
+                        <tr key={user.id} className="hover:bg-white/5 transition-colors group">
+                          <td className="px-6 py-5">
+                            <div className="flex items-center gap-4">
+                              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-green-600 to-green-900 text-white flex items-center justify-center font-black text-sm shadow-lg group-hover:scale-110 transition-transform uppercase">
+                                {user.name.charAt(0)}
+                              </div>
+                              <span className="font-bold text-sm text-white group-hover:translate-x-1 transition-transform">{user.name}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-5">
+                            <div className="flex items-center gap-2 text-neutral-400 font-mono text-xs">
+                              <Phone size={12} className="text-green-500" />
+                              {user.phone}
+                            </div>
+                          </td>
+                          <td className="px-6 py-5">
+                            {referrer ? (
+                              <span className="text-xs font-bold text-blue-400 bg-blue-400/10 px-2 py-1 rounded-lg">
+                                {referrer.name}
+                              </span>
+                            ) : (
+                              <span className="text-[10px] uppercase text-neutral-600 font-bold tracking-widest">
+                                Orgánico
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-6 py-5">
+                            <div className="flex flex-col">
+                              <div className="flex items-center gap-2 text-white text-[11px] font-bold">
+                                <Calendar size={12} className="text-neutral-500" />
+                                {new Date(user.timestamp).toLocaleDateString()}
+                              </div>
+                              <div className="flex items-center gap-2 text-neutral-500 text-[10px] ml-5">
+                                {new Date(user.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-5 text-right">
+                            <a
+                              href={`https://wa.me/${user.phone.replace(/\D/g, '')}?text=Hola%20${encodeURIComponent(user.name.split(' ')[0])},%20Te%20hablamos%20de%20parte%20de%20la%20campa%C3%B1a%20por%20un%20Upgrade%20al%20sistema%20de%20Salud.`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-2 text-[10px] font-black uppercase bg-green-600/10 text-green-500 px-4 py-2.5 rounded-xl border border-green-500/20 hover:bg-green-600 hover:text-white transition-all active:scale-95 shadow-lg shadow-green-900/10"
+                            >
+                              Chat Privado <ExternalLink size={12} />
+                            </a>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                    {bienestarUsers.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="px-6 py-32 text-center">
+                          <div className="max-w-xs mx-auto space-y-4">
+                            <div className="w-16 h-16 bg-neutral-900 rounded-full flex items-center justify-center mx-auto text-neutral-700">
+                              <ClipboardList size={32} />
+                            </div>
+                            <p className="text-neutral-500 font-bold uppercase tracking-widest text-[10px] leading-relaxed">
+                              Base de datos vacía.<br />Los nuevos inscritos en Bienestar aparecerán aquí automáticamente.
                             </p>
                           </div>
                         </td>
