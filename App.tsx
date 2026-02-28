@@ -10,6 +10,8 @@ import { Experience6_InstaLogin } from './components/Experience6_InstaLogin';
 import { Experience7_Feed } from './components/Experience7_Feed';
 import { Experience9_SalesPage } from './components/Experience9_SalesPage';
 import { AdminPanel } from './components/AdminPanel';
+import { BienestarLanding } from './components/BienestarLanding';
+import { BienestarLogin } from './components/BienestarLogin';
 import { Settings, ChevronRight, X, BarChart3 } from 'lucide-react';
 import { db } from './src/lib/firebase';
 import { doc, setDoc, arrayUnion } from 'firebase/firestore';
@@ -51,15 +53,27 @@ const App: React.FC = () => {
     return () => window.removeEventListener('click', handleWindowClick);
   }, []);
 
-  // Verificar parámetros de URL
+  // Verificar parámetros de URL y ruta
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+    const path = window.location.pathname;
+
+    // 1. Manejar Modo Debug (parámetros explícitos)
     if (params.get('debug') === 'true' || params.get('admin') === 'true') {
       setDebugEnabled(true);
       localStorage.setItem('vladimir_debug_mode', 'true');
     } else if (params.get('debug') === 'false') {
       setDebugEnabled(false);
       localStorage.setItem('vladimir_debug_mode', 'false');
+    }
+
+    // 2. Manejar Navegación por Ruta (independiente del modo debug)
+    if (path === '/adminpanel') {
+      setStep(FunnelStep.ADMIN);
+    } else if (path === '/bienestarytecnologia/login') {
+      setStep(FunnelStep.BIENESTAR_LOGIN);
+    } else if (path === '/bienestarytecnologia') {
+      setStep(FunnelStep.BIENESTAR_LANDING);
     }
   }, []);
 
@@ -192,6 +206,10 @@ const App: React.FC = () => {
 
         {/* ADMIN PANEL */}
         {step === FunnelStep.ADMIN && <AdminPanel onExit={() => setStep(FunnelStep.WELCOME)} />}
+
+        {/* BIENESTAR EXPERIENCE */}
+        {step === FunnelStep.BIENESTAR_LANDING && <BienestarLanding />}
+        {step === FunnelStep.BIENESTAR_LOGIN && <BienestarLogin />}
       </div>
     </div>
   );

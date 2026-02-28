@@ -43,46 +43,68 @@ export const Experience0_Welcome: React.FC<Props> = ({ onComplete, onSkipToSales
 
   if (!isPlaying) {
     return (
-      <div className="fixed inset-0 z-50 bg-[#050505] flex flex-col items-center justify-center p-6 text-center overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-red-600/20 rounded-full blur-[120px] animate-pulse" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-[120px] animate-pulse [animation-delay:1s]" />
+      <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center overflow-hidden">
+        {/* Background Video */}
+        <div className="absolute inset-0 z-0">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover opacity-60 scale-105"
+            src="https://res.cloudinary.com/dtwegeovt/video/upload/f_auto,q_auto/v1771085071/copy_7E034931-DE61-42E1-B749-0C64E19EE061_f7zpjb.mov"
+          />
+          {/* Gradient Overlays */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-black/90" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/40" />
         </div>
 
-        <div className="relative z-10 max-w-md w-full flex flex-col items-center justify-between h-full py-12">
-          <div className="w-full space-y-4">
-            <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1 rounded-full backdrop-blur-sm">
-              <Activity size={14} className="text-red-600" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400">Acceso Prioritario</span>
+        <div className="relative z-10 max-w-md w-full flex flex-col items-center justify-between h-[100dvh] py-16 px-6">
+          <div className="w-full space-y-6 text-center">
+            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 px-4 py-1.5 rounded-full backdrop-blur-md animate-in fade-in slide-in-from-top duration-700">
+              <div className="w-1.5 h-1.5 bg-red-600 rounded-full animate-pulse" />
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/90">Acceso Exclusivo</span>
             </div>
-            <h1 className="text-3xl md:text-6xl font-black uppercase tracking-tighter leading-none text-white break-words">
-              Garantizando tu <span className="text-red-600">bienestar</span>
-            </h1>
-            <p className="text-xl text-neutral-400 font-medium leading-tight px-4">
-              Tu tranquilidad no puede ser una promesa. Es una deuda que vamos a ejecutar hoy.
-            </p>
+
+            <div className="space-y-2">
+              <h1 className="text-5xl md:text-6xl font-black uppercase tracking-tighter leading-[0.85] text-white flex flex-col items-center animate-in zoom-in duration-700">
+                <span>LA LEY DEL</span>
+                <span className="text-red-600 italic">BIENESTAR</span>
+              </h1>
+              <p className="text-neutral-300 font-mono text-[10px] uppercase tracking-[0.4em] mt-4 opacity-60">
+                Archivo Privado • Protocolo 771
+              </p>
+            </div>
           </div>
 
-          <div className="flex flex-col items-center gap-6">
+          <div className="flex flex-col items-center gap-8 w-full">
             <button
               onClick={handleStart}
-              className="group relative w-24 h-24 flex items-center justify-center"
+              className="group relative w-24 h-24 flex items-center justify-center transition-transform active:scale-95"
             >
-              <div className="absolute inset-0 bg-red-600 rounded-full animate-ping opacity-20" />
-              <div className="absolute inset-0 bg-red-600 rounded-full group-hover:scale-110 transition-transform shadow-[0_0_30px_rgba(220,38,38,0.5)]" />
-              <Play className="relative z-10 text-white fill-white ml-1" size={32} />
+              <div className="absolute inset-0 bg-red-600 rounded-full animate-ping opacity-25" />
+              <div className="absolute inset-0 bg-red-600/20 rounded-full blur-2xl group-hover:bg-red-600/40 transition-colors" />
+              <div className="absolute inset-0 bg-gradient-to-br from-red-500 to-red-700 rounded-full shadow-[0_0_50px_rgba(220,38,38,0.6)] group-hover:scale-105 transition-transform border border-white/20" />
+              <div className="relative z-10 w-20 h-20 bg-black/20 rounded-full backdrop-blur-sm flex items-center justify-center border border-white/10">
+                <Play className="text-white fill-white ml-1 group-hover:scale-110 transition-transform" size={32} />
+              </div>
             </button>
-            <p className="text-[10px] text-neutral-600 uppercase font-bold tracking-[0.3em] animate-pulse">
-              Toca para entrar a la experiencia
-            </p>
+            <div className="space-y-4 text-center">
+              <p className="text-sm text-white font-bold uppercase tracking-[0.2em] animate-pulse">
+                Toca para entrar
+              </p>
+              <p className="text-[11px] text-neutral-400 font-medium leading-relaxed max-w-[280px] mx-auto">
+                Tu tranquilidad no puede ser una promesa. <br /> Es una <span className="text-white font-bold">deuda</span> que vamos a ejecutar hoy.
+              </p>
+            </div>
           </div>
 
-          <div className="w-full">
+          <div className="w-full text-center">
             <button
               onClick={onSkipToSales}
-              className="text-neutral-600 hover:text-neutral-400 transition-colors text-xs font-medium underline underline-offset-4 decoration-neutral-700 hover:decoration-neutral-400"
+              className="text-white/40 hover:text-white transition-colors text-[10px] font-bold uppercase tracking-widest underline underline-offset-8 decoration-white/20 hover:decoration-white/50"
             >
-              Toca si ya viviste la experiencia
+              YA VIVÍ LA EXPERIENCIA
             </button>
           </div>
         </div>
@@ -95,7 +117,7 @@ export const Experience0_Welcome: React.FC<Props> = ({ onComplete, onSkipToSales
       <div className="fixed inset-0 z-[60] bg-black flex items-center justify-center">
         <video
           ref={videoRef}
-          src="https://res.cloudinary.com/dtwegeovt/video/upload/v1770429768/copy_8D64D716-A45D-4F7F-A943-E40FB1319F55_c0bcld.mov"
+          src="https://res.cloudinary.com/dtwegeovt/video/upload/v1771346903/copy_49A27508-DC8A-43C8-87FF-6B1D000FB237_uuyb4n.mov"
           playsInline
           className="w-full h-full object-contain"
           onEnded={() => setVideoFinished(true)}

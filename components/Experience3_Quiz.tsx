@@ -28,13 +28,21 @@ export const Experience3_Quiz: React.FC<Props> = ({ onComplete }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
 
-  const handleSelect = (option: string) => {
-    if (currentStep < questions.length - 1) {
-      setCurrentStep(prev => prev + 1);
-    } else {
-      setIsFinished(true);
-      setTimeout(onComplete, 3500);
-    }
+  const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
+
+  const handleSelect = (idx: number) => {
+    setSelectedIdx(idx);
+
+    // Pequeño delay para que el usuario vea su selección antes de cambiar
+    setTimeout(() => {
+      setSelectedIdx(null);
+      if (currentStep < questions.length - 1) {
+        setCurrentStep(prev => prev + 1);
+      } else {
+        setIsFinished(true);
+        setTimeout(onComplete, 3500);
+      }
+    }, 400); // 400ms es suficiente para feedback visual
   };
 
   if (isFinished) {
@@ -68,20 +76,30 @@ export const Experience3_Quiz: React.FC<Props> = ({ onComplete }) => {
         </h2>
 
         <div className="grid gap-4">
-          {q.options.map((opt, i) => (
-            <button
-              key={i}
-              onClick={() => handleSelect(opt)}
-              className="group relative w-full p-6 text-left rounded-2xl bg-neutral-900 border border-neutral-800 hover:border-red-600 transition-all active:scale-[0.98]"
-            >
-              <div className="flex items-center justify-between gap-4">
-                <span className="text-lg font-medium text-neutral-200 group-hover:text-white transition-colors">{opt}</span>
-                <div className="w-6 h-6 rounded-full border-2 border-neutral-700 group-hover:border-red-600 transition-colors flex items-center justify-center">
-                  <div className="w-3 h-3 rounded-full bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+          {q.options.map((opt, i) => {
+            const isSelected = selectedIdx === i;
+            return (
+              <button
+                key={`${currentStep}-${i}`}
+                onClick={() => handleSelect(i)}
+                className={`group relative w-full p-6 text-left rounded-2xl transition-all active:scale-[0.98] ${isSelected
+                    ? 'bg-red-950/30 border-red-600 shadow-[0_0_20px_rgba(220,38,38,0.2)]'
+                    : 'bg-neutral-900 border-neutral-800 hover:border-neutral-700'
+                  }`}
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <span className={`text-lg font-medium transition-colors ${isSelected ? 'text-white' : 'text-neutral-200'}`}>
+                    {opt}
+                  </span>
+                  <div className={`w-6 h-6 rounded-full border-2 transition-colors flex items-center justify-center ${isSelected ? 'border-red-600' : 'border-neutral-700'
+                    }`}>
+                    <div className={`w-3 h-3 rounded-full bg-red-600 transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0'
+                      }`} />
+                  </div>
                 </div>
-              </div>
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>

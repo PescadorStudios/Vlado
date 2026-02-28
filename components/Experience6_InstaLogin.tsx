@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Shield, Lock, User, ChevronRight } from 'lucide-react';
+import { Instagram, Shield, Lock, Eye } from 'lucide-react';
 
 interface Props {
   onComplete: () => void;
@@ -8,64 +7,51 @@ interface Props {
 
 export const Experience6_InstaLogin: React.FC<Props> = ({ onComplete }) => {
   return (
-    <div className="fixed inset-0 bg-[#0a0a0a] flex items-center justify-center p-6 overflow-hidden">
-      {/* Background Decorative Elements */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-red-900/20 blur-[120px] rounded-full animate-pulse" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-900/10 blur-[120px] rounded-full animate-pulse" />
+    <div className="fixed inset-0 bg-[#050505] flex flex-col items-center justify-center p-6 overflow-hidden">
+      {/* Background Glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-red-600/10 rounded-full blur-[120px] pointer-events-none" />
 
-      <div className="w-full max-w-md relative">
-        {/* Glassmorphism Card */}
-        <div className="relative z-10 bg-black/40 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-2xl overflow-hidden group">
-          {/* Subtle light sweep animation */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
-
-          {/* Header */}
-          <div className="flex flex-col items-center mb-10">
-            <div className="w-16 h-16 bg-red-600 rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(220,38,38,0.3)] mb-6 transform -rotate-3 hover:rotate-0 transition-transform duration-500">
-              <Shield className="text-white" size={32} />
-            </div>
-            <h1 className="text-2xl font-black text-white uppercase tracking-widest text-center">
-              Login <span className="text-red-500">Comunidad</span> Privada
-            </h1>
-            <div className="h-1 w-12 bg-red-600 mt-2 rounded-full" />
+      <div className="w-full max-w-[340px] relative z-10">
+        {/* Header Branding */}
+        <div className="text-center mb-10 space-y-4">
+          <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1 rounded-full backdrop-blur-md">
+            <Lock size={12} className="text-red-500" />
+            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-neutral-400">Servidor de Respaldo Seguro</span>
           </div>
+          <h1 className="text-4xl md:text-5xl font-serif italic text-white tracking-tight">Comunidad privada</h1>
+          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-neutral-500">Acceso a Evidencia</p>
+        </div>
 
-          {/* Credentials Form */}
-          <div className="space-y-6">
-            <div className="relative group">
-              <div className="absolute inset-y-0 left-4 flex items-center text-neutral-500 group-focus-within:text-red-500 transition-colors">
-                <User size={18} />
-              </div>
+        {/* Login Container */}
+        <div className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 p-8 rounded-[32px] shadow-2xl space-y-6 relative overflow-hidden group">
+          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-red-500/50 to-transparent" />
+
+          <div className="space-y-3">
+            <div className="relative">
               <input
                 type="text"
-                defaultValue="Leydelbienestar"
-                className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white font-medium placeholder:text-neutral-600 focus:border-red-500/50 focus:bg-white/10 outline-none transition-all"
+                placeholder="Usuario o correo"
+                defaultValue="Ley_bienestar"
+                className="w-full h-12 bg-white/5 border border-white/10 rounded-2xl px-4 text-sm text-white placeholder-neutral-600 focus:border-red-500/50 focus:bg-white/10 outline-none transition-all font-medium"
                 readOnly
               />
-              <label className="absolute -top-2.5 left-4 px-2 bg-[#121212] text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Usuario</label>
             </div>
-
-            <div className="relative group">
-              <div className="absolute inset-y-0 left-4 flex items-center text-neutral-500 group-focus-within:text-red-500 transition-colors">
-                <Lock size={18} />
-              </div>
+            <div className="relative">
               <input
-                type="password"
-                defaultValue="VladimirEjecuta"
-                className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white font-medium placeholder:text-neutral-600 focus:border-red-500/50 focus:bg-white/10 outline-none transition-all"
+                type="text"
+                placeholder="Contraseña"
+                defaultValue="Vlado_ejecuta"
+                className="w-full h-12 bg-white/5 border border-white/10 rounded-2xl px-4 text-sm text-white placeholder-neutral-600 focus:border-red-500/50 focus:bg-white/10 outline-none transition-all font-medium"
                 readOnly
               />
-              <label className="absolute -top-2.5 left-4 px-2 bg-[#121212] text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Clave</label>
             </div>
 
             <button
               onClick={onComplete}
-              className="group relative w-full mt-4 bg-red-600 hover:bg-red-500 text-white font-black py-5 rounded-2xl shadow-[0_10px_30px_rgba(220,38,38,0.3)] hover:shadow-[0_15px_40px_rgba(220,38,38,0.4)] active:scale-[0.98] transition-all flex items-center justify-center gap-3 overflow-hidden"
+              className="w-full h-12 bg-red-600 hover:bg-red-500 text-white font-black rounded-2xl text-[11px] uppercase tracking-widest transition-all transform active:scale-95 shadow-[0_8px_20px_rgba(220,38,38,0.3)] hover:shadow-[0_12px_25px_rgba(220,38,38,0.4)] flex items-center justify-center gap-2"
             >
-              <span className="relative z-10 uppercase tracking-widest">Acceder al Sistema</span>
-              <ChevronRight className="relative z-10 group-hover:translate-x-1 transition-transform" size={20} />
-              {/* Button Shine */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+              <Eye size={16} />
+              Ver Archivo Privado
             </button>
           </div>
 

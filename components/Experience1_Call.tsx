@@ -24,7 +24,7 @@ export const Experience1_Call: React.FC<Props> = ({ onComplete }) => {
     ringtoneRef.current = ringtone;
 
     // Voz de Camila (Pre-carga)
-    const voice = new Audio('https://res.cloudinary.com/dtwegeovt/video/upload/v1770431366/copy_9E915D7C-690E-4F76-8D15-9A3283B97740_zjhfbw.mp3');
+    const voice = new Audio('https://res.cloudinary.com/dtwegeovt/video/upload/v1771345967/ElevenLabs_2026-02-17T16_29_48_Lina_-_Carefree_Fresh_pvc_sp115_s50_sb75_se0_b_m2_qcqnge.mp3');
     voice.muted = false;
     voice.volume = 1.0;
     voice.load(); // Forzamos carga
@@ -80,7 +80,7 @@ export const Experience1_Call: React.FC<Props> = ({ onComplete }) => {
       };
     } else {
       // Fallback si por alguna razón el ref se perdió
-      const fallbackVoice = new Audio('https://res.cloudinary.com/dtwegeovt/video/upload/v1770431366/copy_9E915D7C-690E-4F76-8D15-9A3283B97740_zjhfbw.mp3');
+      const fallbackVoice = new Audio('https://res.cloudinary.com/dtwegeovt/video/upload/v1771345967/ElevenLabs_2026-02-17T16_29_48_Lina_-_Carefree_Fresh_pvc_sp115_s50_sb75_se0_b_m2_qcqnge.mp3');
       fallbackVoice.play();
       fallbackVoice.onended = handleEndCall;
     }
@@ -103,7 +103,7 @@ export const Experience1_Call: React.FC<Props> = ({ onComplete }) => {
         <div className="relative">
           <div className="w-32 h-32 rounded-full bg-neutral-800 flex items-center justify-center border-4 border-neutral-700 overflow-hidden animate-pulse-custom shadow-[0_0_50px_rgba(255,255,255,0.1)]">
             <img
-              src="https://res.cloudinary.com/dtwegeovt/image/upload/v1770430080/IMG_7827_wrfl6u.jpg"
+              src="https://res.cloudinary.com/dtwegeovt/image/upload/v1771123510/IMG_7904_gfcss6.jpg"
               alt="Camila Avatar"
               className="w-full h-full object-cover"
             />
