@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FunnelStep, UserSession, Lead } from '../types';
 import { db } from '../src/lib/firebase';
-import { collection, query, orderBy, onSnapshot, limit, getCountFromServer } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, limit, getCountFromServer, doc, updateDoc } from 'firebase/firestore';
 import {
   Users,
   Activity,
@@ -33,6 +33,9 @@ export const AdminPanel: React.FC<Props> = ({ onExit }) => {
   const [totalSessions, setTotalSessions] = useState(0);
   const [totalLeads, setTotalLeads] = useState(0);
   const [totalBienestar, setTotalBienestar] = useState(0);
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [newSponsorId, setNewSponsorId] = useState<string>('');
+  const [updatingSponsor, setUpdatingSponsor] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -174,6 +177,23 @@ export const AdminPanel: React.FC<Props> = ({ onExit }) => {
     if (sessions.length === 0) return 0;
     const count = sessions.filter(s => s.stepsReached && s.stepsReached.includes(step)).length;
     return Math.round((count / sessions.length) * 100);
+  };
+
+  const handleUpdateSponsor = async (userId: string) => {
+    setUpdatingSponsor(userId);
+    try {
+      const userRef = doc(db, "bienestar_users", userId);
+      await updateDoc(userRef, {
+        referredBy: newSponsorId === 'none' ? null : newSponsorId
+      });
+      setEditingUserId(null);
+      setNewSponsorId('');
+    } catch (e) {
+      console.error("Error updating sponsor:", e);
+      alert("Error al actualizar patrocinador.");
+    } finally {
+      setUpdatingSponsor(null);
+    }
   };
 
   const funnelSteps = Object.values(FunnelStep).filter(s => s !== FunnelStep.ADMIN);
@@ -488,14 +508,60 @@ export const AdminPanel: React.FC<Props> = ({ onExit }) => {
                             </div>
                           </td>
                           <td className="px-6 py-5">
-                            {referrer ? (
-                              <span className="text-xs font-bold text-blue-400 bg-blue-400/10 px-2 py-1 rounded-lg">
-                                {referrer.name}
-                              </span>
+                            {editingUserId === user.id ? (
+                              <div className="flex flex-col gap-2">
+                                <select
+                                  value={newSponsorId}
+                                  onChange={(e) => setNewSponsorId(e.target.value)}
+                                  className="bg-neutral-800 text-xs text-white border border-neutral-700 rounded-lg px-2 py-1 outline-none"
+                                >
+                                  <option value="">Seleccionar Patrocinador</option>
+                                  <option value="none">-- Sin Patrocinador (Orgánico) --</option>
+                                  {bienestarUsers
+                                    .filter(u => u.id !== user.id) // No puede ser su propio patrocinador
+                                    .sort((a, b) => a.name.localeCompare(b.name))
+                                    .map(u => (
+                                      <option key={u.id} value={u.id}>{u.name}</option>
+                                    ))
+                                  }
+                                </select>
+                                <div className="flex gap-2">
+                                  <button
+                                    onClick={() => handleUpdateSponsor(user.id)}
+                                    disabled={updatingSponsor === user.id || !newSponsorId}
+                                    className="text-[9px] font-black uppercase bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700 disabled:opacity-50"
+                                  >
+                                    {updatingSponsor === user.id ? '...' : 'Guardar'}
+                                  </button>
+                                  <button
+                                    onClick={() => { setEditingUserId(null); setNewSponsorId(''); }}
+                                    className="text-[9px] font-black uppercase bg-neutral-700 text-white px-2 py-1 rounded hover:bg-neutral-600"
+                                  >
+                                    Cancelar
+                                  </button>
+                                </div>
+                              </div>
                             ) : (
-                              <span className="text-[10px] uppercase text-neutral-600 font-bold tracking-widest">
-                                Orgánico
-                              </span>
+                              <div className="flex flex-col gap-1 items-start">
+                                {referrer ? (
+                                  <span className="text-xs font-bold text-blue-400 bg-blue-400/10 px-2 py-1 rounded-lg">
+                                    {referrer.name}
+                                  </span>
+                                ) : (
+                                  <span className="text-[10px] uppercase text-neutral-600 font-bold tracking-widest">
+                                    Orgánico
+                                  </span>
+                                )}
+                                <button
+                                  onClick={() => {
+                                    setEditingUserId(user.id);
+                                    setNewSponsorId(user.referredBy || 'none');
+                                  }}
+                                  className="text-[9px] font-black uppercase text-neutral-500 hover:text-blue-500 underline underline-offset-2 transition-colors"
+                                >
+                                  Cambiar Patrocinador
+                                </button>
+                              </div>
                             )}
                           </td>
                           <td className="px-6 py-5">
